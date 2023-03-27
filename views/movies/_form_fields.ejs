@@ -1,0 +1,13 @@
+<label for="">Title</label>
+<input type="text" name="title" value="<%= movie.title %>"> 
+<label for="">Director</label>
+<select name="director" id="">
+    <% directors.forEach(director => { %>
+        <% if (director.id === movie.director) { %>
+            <option selected value="<%= director.id %>"><%= director.name %></option>
+        <% } else { %>
+            <option value="<%= director.id %>"><%= director.name %></option>
+        <% } %>
+    <% }) %>
+</select>
+
