@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+const coverImageBasePath = 'uploads/movieCovers'
+const path = require('path')
 const movieSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -33,5 +35,12 @@ const movieSchema = new mongoose.Schema({
 
 })
 
+movieSchema.virtual('coverImagePath').get(function() {
+    if(this.coverImageName != null) {
+        return path.join('/',coverImageBasePath, this.coverImageName)
+    }
+})
+
 module.exports = mongoose.model('Movie', movieSchema)
+module.exports.coverImageBasePath = coverImageBasePath
 
