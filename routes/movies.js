@@ -1,18 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const multer = require('multer')
-const fs = require('fs')
 const Movie = require('../models/movie')
-const path = require('path')
-const uploadPath = path.join('public',Movie.coverImageBasePath)
 const Director = require('../models/director')
 const imageMimeTypes = ['image/jpeg','image/png', 'image/gif']
-const upload = multer({
-    dest: uploadPath,
-    fileFilter: (req, file, callback) => {
-        callback(null, imageMimeTypes.includes(file.mimetype))
-    }
-})
+
 
 // get all movies
 router.get('/',async (req,res)=> {
@@ -51,41 +42,27 @@ router.get('/new',async(req,res)=>{
 
 
 // create new movie
-router.post('/', upload.single('cover'), async(req,res)=>{
-    const fileName = req.file != null ? req.file.filename : null
-    console.log(fileName)
+router.post('/', async(req,res)=>{
     const movie = new Movie({
        title: req.body.title,
        director: req.body.director,
        releaseDate: new Date(req.body.releaseDate),
        movieTime: req.body.movieTime,
-       coverImageName: fileName,
        synopsis: req.body.synopsis
     })
 
-
-    console.log(movie)
+    saveCover(movie, req.body.cover)
 
     try {
         const newMovie = await movie.save()
         // res.redirect(`movies/${newMovie.id}`)
         res.redirect(`movies`)
     } catch {
-
-        if (movie.coverImageName != null) {
-            removeMovieCover(movie.coverImageName)
-        }
-
         renderNewPage(res, movie, true )
     }
 
 })
 
-function removeMovieCover(coverImageName) {
-    fs.unlink(path.join(uploadPath, coverImageName), err => {
-        if (err) console.error(err)
-    })
-}
 
 async function renderNewPage(res, movie, hasError = false) {
     try {
@@ -101,6 +78,15 @@ async function renderNewPage(res, movie, hasError = false) {
     }
 }
 
+function saveCover(movie,coverEncoded) {
+    if(coverEncoded == null) return
+
+    const cover = JSON.parse(coverEncoded)
+    if (cover != null && imageMimeTypes.includes(cover.type) ) {
+        movie.coverImage = new Buffer.from(cover.data,'base64')
+        movie.coverImageType = cover.type
+    }
+}
 
 module.exports = router
 
