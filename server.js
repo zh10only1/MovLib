@@ -6,6 +6,7 @@ const indexRouter = require('./routes/index')
 const directorRouter = require('./routes/directors')
 const movieRouter = require('./routes/movies')
 const envVar = require('dotenv')
+const methodOverride = require('method-override')
 envVar.config()
 const bodyParser = require('body-parser')
 
@@ -20,6 +21,7 @@ const db = mongoose.connection
 db.on('error',(error)=> console.error(error))
 db.once('open',()=> console.log('Connected to db'))
 
+app.use(methodOverride('_method'))
 app.use(bodyParser.urlencoded({limit: '10mb', extended: false}))
 app.set('view engine','ejs')
 app.set('views',__dirname + '/views')
